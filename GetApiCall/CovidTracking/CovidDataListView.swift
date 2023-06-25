@@ -7,14 +7,60 @@
 
 import SwiftUI
 
-struct CovidDataListView: View {
+struct CovidDataListView : View {
+    @StateObject var viewModel = StateDataViewModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Group {
+            switch viewModel.state {
+            case .success(let dailyStateData):
+                List(dailyStateData, id:\.identifier) { dailyData in
+                    VStack(alignment: .leading) {
+                        Text(dailyData.state)
+                            .font(.headline)
+                        Text("Positive cases: \(dailyData.positive ?? 0)")
+                        Text("Deaths: \(dailyData.death ?? 0) ")
+                    }
+                }
+            case .failure(let error):
+                Text("Error: \(error.localizedDescription)")
+            }
+        }
+        .overlay(
+            Group {
+                if viewModel.loading == .loading {
+                    ProgressView()
+                }
+            }
+        )
+        .onAppear {
+            viewModel.fetchDailyStateData()
+        }
     }
 }
 
-struct CovidDataListView_Previews: PreviewProvider {
-    static var previews: some View {
-        CovidDataListView()
-    }
-}
+
+
+//struct CovidDataListView: View {
+//    @StateObject var vm = CovidDataViewModel()
+//    var body: some View {
+//        ScrollView{
+//            LazyVStack{
+//                ForEach(0..<vm.covidDataList.count){ i in
+//                    let model = vm.covidDataList[i]
+//                    VStack{
+//                        HStack{
+//                            Text(model.state)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//struct CovidDataListView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        CovidDataListView()
+//    }
+//}
